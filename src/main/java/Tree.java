@@ -1,9 +1,8 @@
+import java.util.ArrayList;
+
 public class Tree {
 	private Node root;
 	private int treeSize;
-	public static void main(String[] args) {
-		System.out.println("hello");
-	}
 
 	public Tree(){
 		root = null;
@@ -11,12 +10,19 @@ public class Tree {
 	}
 
 	public boolean insert(int x){
-		if(root == null){
-			root = new Node(x);
-			root.parent = null;
-		}else {
-			root.addKey(x);
-		}
+        if(root == null){
+            root = new Node();
+            root.keyList.add(x);
+            root.parent = null;
+        }else{
+            Node leafNode = root.find(x);
+            if(!leafNode.keyList.contains(x)){
+              leafNode.addKey(x);
+            }else{
+                return false;
+            }
+        }
+
 		return true;
 	}
 	public int size(){
@@ -25,80 +31,108 @@ public class Tree {
 	public int size(int x){
 		return treeSize;
 	}
-	public int get(int x){}
+	public int get(int x){ return 0;}
 
 	class Node {
-		public int key1;
-		public int key2;
-		public int moveUpKey;
+        public Node parent;
+        public ArrayList<Integer> keyList;
+        public ArrayList<Node> childList;
+		public Node() {
+            keyList = new ArrayList<>();
+            childList = new ArrayList<>();
+		}
 
-		public Node left;
-		public Node middle;
-		public Node right;
-		public Node parent;
+        //returns leaf node or node containing x
+        private Node find(int x){
+            if(isLeaf() || keyList.contains(x)){
+                return this;
+            }
 
-		public Node(int x) {
-			key1 = x;
-			key2 = -1;
-			left = null;
-			middle = null;
-			right = null;
+            int i = 0;
+            while(i < keyList.size() && x > keyList.get(i)){
+                i++;
+            }
+
+            return childList.get(i).find(x);
+        }
+
+        private boolean isLeaf(){
+            return childList.isEmpty();
+        }
+
+        //adds key to leaf node
+		public void addKey(int x) {
+            int i = 0;
+            while(i < keyList.size() && x > keyList.get(i)){
+                i++;
+            }
+            keyList.add(i, x);
+            if(isFull()){
+                splitUp();
+            }
+
 		}
-		/**
-		 * Inserts a new node as a descendant of this node.
-		 @param x the value to insert
-		 */
-		public void addKey(int x {
-			if(x < key1){
-				if(left == null){
-					if(key2 == -1){
-						key2 = key1;
-						key1 = x;
-					}
-					else{
-						moveUpKey = key1;
-						key2 = key1;
-						key1 = x;
-						moveUp(key1, key2, moveUpKey, parent);
-					}
-				}
-				else{
-					if(parent == null) {
-						left.addKey(x);
-					}else{
-						left.addKey(x, )
-					}
-				}
-			}
-			else if(x > key1){
-				if(left == null){
-					if(key2 == -1){
-						key2 = x;
-					}
-					else if(x > key2){
-						moveUpKey = key2;
-						key2 = x;
-						moveUp(key1, key2, moveUpKey, parent);
-					}
-					else if(x < key2){
-						moveUpKey = x;
-						moveUp(key1, key2, moveUpKey, parent);
-					}
-				}
-			}
-		}
-		private void moveUp(int key1, int key2, int moveUpKey, Node parent){
-			if(parent == null){
-				left = new Node(key1);
-				right = new Node(key2);
-				this.key1 = moveUpKey;
-				this.key2 = -1;
-			}else{
-				left = new Node(key1);
-				right = new Node(key2);
-				parent.addKey(moveUpKey, );
-			}
-		}
+        /*
+
+         */
+        //splits up leaf node
+        private void splitUp(){
+            //makes leftmost and rightmost keys into nodes in childList
+            Node newNode1 = new Node();
+            Node newNode2 = new Node();
+            newNode2.keyList.add(keyList.remove(2));
+            newNode1.keyList.add(keyList.remove(0));
+            childList.add(newNode1);
+            childList.add(newNode2);
+
+            if(parent == null){
+                newNode1.parent = this;
+                newNode2.parent = this;
+            } else{
+                newNode1.parent = this.parent;
+                newNode2.parent = this.parent;
+
+                parent.addChildren(keyList.get(0), childList);
+                parent = null;
+            }
+        }
+
+        /**
+         * Adds key and children to parent node
+         * Removes previous child in childList
+         * @param x
+         * @param oChildList
+         */
+        public void addChildren(int x, ArrayList<Node> oChildList){
+            int i = 0;
+            while(i < keyList.size() && x > keyList.get(i)){
+                i++;
+            }
+            keyList.add(i, x);
+            childList.remove(i);
+            childList.add(i, oChildList.remove(1));
+            childList.add(i, oChildList.remove(0));
+            if(isFull()){
+                splitParentUp();
+            }
+        }
+        //splits up node that currently has 4 children
+        public void splitParentUp(){
+            Node newNode1 = new Node();
+            Node newNode2 = new Node();
+            newNode2.keyList.add(keyList.remove(2));
+            newNode1.keyList.add(keyList.remove(0));
+            newNode1.childList.add(childList.remove(0));
+            newNode1.childList.add(childList.remove(0));
+            newNode2.childList.add(childList.remove(0));
+            newNode2.childList.add(childList.remove(0));
+            childList.add(newNode1);
+            childList.add(newNode2);
+
+        }
+        private boolean isFull(){
+            return keyList.size() > 2;
+        }
 
 	}
 }
