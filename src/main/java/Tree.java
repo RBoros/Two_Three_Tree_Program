@@ -2,11 +2,11 @@ import java.util.ArrayList;
 
 public class Tree {
 	private Node root;
-	private int treeSize;
+	private int fullTreeSize;
 
 	public Tree(){
 		root = null;
-		treeSize = 0;
+		fullTreeSize = 0;
 	}
 
 	public boolean insert(int x){
@@ -14,22 +14,25 @@ public class Tree {
             root = new Node();
             root.keyList.add(x);
             root.parent = null;
+			return true;
         }else{
             Node leafNode = root.find(x);
             if(!leafNode.keyList.contains(x)){
-              leafNode.addKey(x);
-            }else{
-                return false;
+              leafNode.addKey(x, leafNode.childList);
+			  fullTreeSize++;
+			  return true;
             }
         }
 
-		return true;
+		return false;
 	}
 	public int size(){
-		return treeSize;
+		return
 	}
 	public int size(int x){
 		return treeSize;
+		//do while loop that goes to every parent and increments tree size
+		//should be log n
 	}
 	public int get(int x){ return 0;}
 
@@ -37,9 +40,11 @@ public class Tree {
         public Node parent;
         public ArrayList<Integer> keyList;
         public ArrayList<Node> childList;
+		int keySize;
 		public Node() {
             keyList = new ArrayList<>();
             childList = new ArrayList<>();
+			keySize = 0;
 		}
 
         //returns leaf node or node containing x
@@ -59,80 +64,59 @@ public class Tree {
         private boolean isLeaf(){
             return childList.isEmpty();
         }
+		private boolean isFull(){
+			return keyList.size() > 2;
+		}
 
-        //adds key to leaf node
-		public void addKey(int x) {
+        //adds key to node
+		public void addKey(int x, ArrayList<Node> oChildList) {
             int i = 0;
             while(i < keyList.size() && x > keyList.get(i)){
                 i++;
             }
             keyList.add(i, x);
+			keySize++;
+
+			if(!oChildList.isEmpty()){
+				childList.remove(i);
+				childList.add(i, oChildList.remove(1));
+				childList.add(i, oChildList.remove(0));
+			}
+
             if(isFull()){
                 splitUp();
             }
-
 		}
-        /*
 
-         */
-        //splits up leaf node
+        //splits up node
         private void splitUp(){
             //makes leftmost and rightmost keys into nodes in childList
             Node newNode1 = new Node();
             Node newNode2 = new Node();
             newNode2.keyList.add(keyList.remove(2));
             newNode1.keyList.add(keyList.remove(0));
-            childList.add(newNode1);
-            childList.add(newNode2);
+			keySize = 1;
 
-            if(parent == null){
-                newNode1.parent = this;
-                newNode2.parent = this;
-            } else{
-                newNode1.parent = this.parent;
-                newNode2.parent = this.parent;
-
-                parent.addChildren(keyList.get(0), childList);
-                parent = null;
-            }
-        }
-
-        /**
-         * Adds key and children to parent node
-         * Removes previous child in childList
-         * @param x
-         * @param oChildList
-         */
-        public void addChildren(int x, ArrayList<Node> oChildList){
-            int i = 0;
-            while(i < keyList.size() && x > keyList.get(i)){
-                i++;
-            }
-            keyList.add(i, x);
-            childList.remove(i);
-            childList.add(i, oChildList.remove(1));
-            childList.add(i, oChildList.remove(0));
-            if(isFull()){
-                splitParentUp();
-            }
-        }
-        //splits up node that currently has 4 children
-        public void splitParentUp(){
-            Node newNode1 = new Node();
-            Node newNode2 = new Node();
-            newNode2.keyList.add(keyList.remove(2));
-            newNode1.keyList.add(keyList.remove(0));
-            newNode1.childList.add(childList.remove(0));
-            newNode1.childList.add(childList.remove(0));
-            newNode2.childList.add(childList.remove(0));
-            newNode2.childList.add(childList.remove(0));
-            childList.add(newNode1);
-            childList.add(newNode2);
-
-        }
-        private boolean isFull(){
-            return keyList.size() > 2;
-        }
-
+			if (!childList.isEmpty()) {
+				childList.get(0).parent = newNode1;
+				childList.get(1).parent = newNode1;
+				childList.get(2).parent = newNode2;
+				childList.get(3).parent = newNode2;
+				newNode1.childList.add(childList.remove(0));
+				newNode1.childList.add(childList.remove(0));
+				newNode2.childList.add(childList.remove(0));
+				newNode2.childList.add(childList.remove(0));
+			}
+			childList.add(newNode1);
+			childList.add(newNode2);
+			if(parent == null){
+				newNode1.parent = this;
+				newNode2.parent = this;
+			}else{
+				newNode1.parent = this.parent;
+				newNode2.parent = this.parent;
+				parent.addKey(keyList.get(0), childList);
+			}
+		}
 	}
 }
