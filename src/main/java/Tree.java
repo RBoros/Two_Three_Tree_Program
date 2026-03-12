@@ -2,11 +2,9 @@ import java.util.ArrayList;
 
 public class Tree {
 	private Node root;
-	private int fullTreeSize;
 
 	public Tree(){
 		root = null;
-		fullTreeSize = 0;
 	}
 
 	public boolean insert(int x){
@@ -20,8 +18,6 @@ public class Tree {
             Node leafNode = root.find(x);
             if(!leafNode.keyList.contains(x)){
               leafNode.addKey(x, leafNode.childList);
-			  fullTreeSize++;
-
 			  return true;
             }
         }
@@ -39,12 +35,8 @@ public class Tree {
 		return 0;
 	}
 	public int get(int x){
-		if(root == null){
-			return 0;
-		}
 		return root.getC(x);
 	}
-
 
 	class Node {
         public Node parent;
@@ -79,13 +71,10 @@ public class Tree {
 		}
 
 		public Integer getC(int x){
+			int leftSize = (!childList.isEmpty())
+					? childList.get(0).subtreeSize
+					: 0;
 
-			int leftSize;
-			if(!childList.isEmpty()){
-				leftSize = childList.get(0).subtreeSize;
-			}else {
-				leftSize = 0;
-			}
 			if(keyList.size() == 1){
 				if (x < leftSize) {
 					return childList.get(0).getC(x);
@@ -96,7 +85,7 @@ public class Tree {
 				return childList.get(1).getC(x - leftSize -1);
 			}
 
-			int middleSize = childList.size() > 1
+			int middleSize = (childList.size() > 1)
 					? childList.get(1).subtreeSize
 					: 0;
 
@@ -113,7 +102,6 @@ public class Tree {
 				return keyList.get(1);
 			}
 			return childList.get(2).getC(x - leftSize - 2 - middleSize);
-
 		}
 
         //adds key to node
@@ -136,7 +124,6 @@ public class Tree {
             }
 			fixSizesUpward();
 		}
-
 
         //splits up node
         private void splitUp(){
@@ -169,17 +156,7 @@ public class Tree {
 				parent.addKey(keyList.get(0), childList);
 			}
 		}
-		public int nodeSize(){
-			return keyList.size();
 
-		}
-		private void addSize(){
-			if(parent == null){
-				return;
-			}else{
-				
-			}
-		}
 		private void fixSizesUpward() {
 			Node current = this;
 			while (current != null) {
@@ -187,14 +164,11 @@ public class Tree {
 				current = current.parent;
 			}
 		}
-
-		private static int sz(Node n) {
-			return (n == null) ? 0 : n.subtreeSize;
-		}
-
 		private void recomputeSize() {
 			int s = keyList.size();
-			for (Node c : childList) s += sz(c);
+			for (Node c : childList) {
+				s += c.subtreeSize;
+			}
 			subtreeSize = s;
 		}
 	}

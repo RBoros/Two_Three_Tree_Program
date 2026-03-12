@@ -33,8 +33,7 @@ public class TreeTests {
         }
 
         @Test
-        public void oneSplitLeft()
-        {
+        public void oneSplitLeft() {
             Tree t = new Tree();
             t.insert(9);
             t.insert(15);
@@ -57,8 +56,7 @@ public class TreeTests {
         }
 
         @Test
-        public void oneSplitRight()
-        {
+        public void oneSplitRight() {
             Tree t = new Tree();
             t.insert(1);
             t.insert(9);
@@ -81,8 +79,7 @@ public class TreeTests {
         }
 
         @Test
-        public void oneSplitMiddle()
-        {
+        public void oneSplitMiddle() {
             Tree t = new Tree();
             t.insert(1);
             t.insert(15);
@@ -104,10 +101,8 @@ public class TreeTests {
 
         }
 
-
         @Test
-        public void testDuplicates()
-        {
+        public void testDuplicates() {
             Tree t = new Tree();
             t.insert(1);
             t.insert(9);
@@ -159,4 +154,20 @@ public class TreeTests {
             assertEquals(20, t.get(6));
             assertEquals(7,t.size());
         }
+
+		@Test
+		public void getTest1(){
+			Tree t = new Tree();
+			t.insert(1);
+			t.insert(4);
+			t.insert(7);
+			t.insert(6);
+			t.insert(8);
+
+			assertEquals(1, t.get(0));
+			assertEquals(4, t.get(1));
+			assertEquals(6, t.get(2));
+			assertEquals(7, t.get(3));
+			assertEquals(8, t.get(4));
+		}
 }
