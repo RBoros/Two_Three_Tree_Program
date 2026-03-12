@@ -13,6 +13,7 @@ public class Tree {
         if(root == null){
             root = new Node();
             root.keyList.add(x);
+			root.subtreeSize = 1;
             root.parent = null;
 			return true;
         }else{
@@ -20,6 +21,7 @@ public class Tree {
             if(!leafNode.keyList.contains(x)){
               leafNode.addKey(x, leafNode.childList);
 			  fullTreeSize++;
+
 			  return true;
             }
         }
@@ -27,24 +29,32 @@ public class Tree {
 		return false;
 	}
 	public int size(){
-		return
+		return root.subtreeSize;
 	}
 	public int size(int x){
-		return treeSize;
-		//do while loop that goes to every parent and increments tree size
-		//should be log n
+		Node treeNode = root.find(x);
+		if(treeNode.keyList.contains(x)){
+			return treeNode.subtreeSize;
+		}
+		return 0;
 	}
-	public int get(int x){ return 0;}
+	public int get(int x){
+		if(root == null){
+			return 0;
+		}
+		return root.getC(x);
+	}
+
 
 	class Node {
         public Node parent;
         public ArrayList<Integer> keyList;
         public ArrayList<Node> childList;
-		int keySize;
+		int subtreeSize;
 		public Node() {
             keyList = new ArrayList<>();
             childList = new ArrayList<>();
-			keySize = 0;
+			subtreeSize = 0;
 		}
 
         //returns leaf node or node containing x
@@ -68,6 +78,44 @@ public class Tree {
 			return keyList.size() > 2;
 		}
 
+		public Integer getC(int x){
+
+			int leftSize;
+			if(!childList.isEmpty()){
+				leftSize = childList.get(0).subtreeSize;
+			}else {
+				leftSize = 0;
+			}
+			if(keyList.size() == 1){
+				if (x < leftSize) {
+					return childList.get(0).getC(x);
+				}
+				if (x == leftSize) {
+					return keyList.get(0);
+				}
+				return childList.get(1).getC(x - leftSize -1);
+			}
+
+			int middleSize = childList.size() > 1
+					? childList.get(1).subtreeSize
+					: 0;
+
+			if (x < leftSize) {
+				return childList.get(0).getC(x);
+			}
+			if (x == leftSize) {
+				return keyList.get(0);
+			}
+			if (x < leftSize + 1 + middleSize) {
+				return childList.get(1).getC(x - leftSize - 1);
+			}
+			if (x == leftSize + 1 + middleSize) {
+				return keyList.get(1);
+			}
+			return childList.get(2).getC(x - leftSize - 2 - middleSize);
+
+		}
+
         //adds key to node
 		public void addKey(int x, ArrayList<Node> oChildList) {
             int i = 0;
@@ -75,7 +123,6 @@ public class Tree {
                 i++;
             }
             keyList.add(i, x);
-			keySize++;
 
 			if(!oChildList.isEmpty()){
 				childList.remove(i);
@@ -85,18 +132,18 @@ public class Tree {
 
             if(isFull()){
                 splitUp();
+				return;
             }
+			fixSizesUpward();
 		}
+
 
         //splits up node
         private void splitUp(){
-            //makes leftmost and rightmost keys into nodes in childList
             Node newNode1 = new Node();
             Node newNode2 = new Node();
             newNode2.keyList.add(keyList.remove(2));
             newNode1.keyList.add(keyList.remove(0));
-			keySize = 1;
-
 			if (!childList.isEmpty()) {
 				childList.get(0).parent = newNode1;
 				childList.get(1).parent = newNode1;
@@ -109,14 +156,46 @@ public class Tree {
 			}
 			childList.add(newNode1);
 			childList.add(newNode2);
+			newNode1.recomputeSize();
+			newNode2.recomputeSize();
+			this.recomputeSize();
 			if(parent == null){
 				newNode1.parent = this;
 				newNode2.parent = this;
+
 			}else{
 				newNode1.parent = this.parent;
 				newNode2.parent = this.parent;
 				parent.addKey(keyList.get(0), childList);
 			}
+		}
+		public int nodeSize(){
+			return keyList.size();
+
+		}
+		private void addSize(){
+			if(parent == null){
+				return;
+			}else{
+				
+			}
+		}
+		private void fixSizesUpward() {
+			Node current = this;
+			while (current != null) {
+				current.recomputeSize();
+				current = current.parent;
+			}
+		}
+
+		private static int sz(Node n) {
+			return (n == null) ? 0 : n.subtreeSize;
+		}
+
+		private void recomputeSize() {
+			int s = keyList.size();
+			for (Node c : childList) s += sz(c);
+			subtreeSize = s;
 		}
 	}
 }
