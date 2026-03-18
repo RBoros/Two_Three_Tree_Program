@@ -71,7 +71,45 @@ public class Tree {
 		}
 
 		public Integer getC(int x){
-			int leftSize = (!childList.isEmpty())
+
+			int offset = x;
+			for(int i = 0; i < keyList.size(); i++){
+				int childSize = (!isLeaf())
+						? childList.get(i).subtreeSize
+						: 0;
+
+				if(offset < childSize){
+					return childList.get(i).getC(offset);
+				}
+				offset -= childSize;
+				if(offset == 0){
+					 return keyList.get(i);
+				}
+				offset--;
+			}
+
+			return (!isLeaf()) ? childList.get(keyList.size()).getC(offset) : null;
+
+			/*
+			int leftSize = (!isLeaf())
+					? childList.get(0).subtreeSize
+					: 0;
+
+			int middleSize = (childList.size() > 1)
+					? childList.get(1).subtreeSize
+					: 0;
+
+			if (x == leftSize) {
+				return keyList.get(0);
+			}
+
+			int i = 0;
+			while(i < keyList.size() && x > leftSize){
+				i++;
+			}
+			return childList.get(i).getC(x);
+
+			int leftSize = (!isLeaf())
 					? childList.get(0).subtreeSize
 					: 0;
 
@@ -102,6 +140,7 @@ public class Tree {
 				return keyList.get(1);
 			}
 			return childList.get(2).getC(x - leftSize - 2 - middleSize);
+			*/
 		}
 
         //adds key to node
